@@ -1,0 +1,49 @@
+# 2d flow around a staircase of steps
+
+seed	    	    12345
+dimension   	    2
+global              gridcut 0.0 comm/sort yes
+
+boundary	    o r p
+
+create_box  	    0 10 0 10 -0.5 0.5
+create_grid 	    100 100 1
+balance_grid        rcb cell
+
+global		    nrho 1.42e16 fnum 3e11
+
+species		    air.species O2 N2 H O He H+ O+
+
+#Can either define mixture ppm^3, or define global ppm^3 and mixture fractions.
+mixture		    air vstream 7810 0 0
+mixture		    air O2 nrho 1.43198E+15
+#mixture       air O2+ nrho
+mixture		    air N2 nrho 1.31720E+16
+#N2+
+mixture		    air H H+ nrho 5.84116E+11
+mixture		    air O O+ nrho 1.22846E+16
+mixture		    air He nrho 3.04541E+13
+mixture		    air temp 641.334
+
+
+read_surf	    geometry.step &
+trans 3.0 4.0 0 &
+scale 0.5 1 1
+
+#Check energy accommodation factor (v this number). normally between 0.5 and 0.9
+surf_collide	    1 diffuse 300.0 0.9
+surf_modify         all collide 1
+
+collide             vss air air.vss
+
+fix		    in emit/face air xlo
+
+timestep 	    0.0001
+
+dump                2 image all 50 image.*.ppm type type pdiam 0.1 &
+                    surf proc 0.01 size 512 512 axes yes 0.9 0.02
+dump_modify	    2 pad 4
+
+stats		    100
+stats_style	    step cpu np nattempt ncoll nscoll nscheck
+run 		    1000
