@@ -40,30 +40,30 @@ output();
 void generatepoints(void) {
 
   int stepstart=3, stepend=5, i;
-  double stepheight=2, dx=10/imax;
+  double plateheight=0.5, stepheight=2, dx=10/imax;
   x[0]=0;
   y[0]=0;
   x[1]=0;
-  y[1]=0.1;
+  y[1]=plateheight;
 
   for (i=2; i<stepstart; i++) {
-    y[i]=0.1;
+    y[i]=plateheight;
     x[i]=(i-1)*dx;
   }
 
-  y[stepstart]=y[stepstart-1]+stepheight;
+  y[stepstart]=plateheight+stepheight;
   x[stepstart]=x[stepstart-1];
 
   for (i=stepstart+1; i<=stepend; i++) {
-    y[i]=y[1]+stepheight;
+    y[i]=plateheight+stepheight;
     x[i]=(i-2)*dx;
   }
 
   x[stepend+1]=x[stepend];
-  y[stepend+1]=y[1];
+  y[stepend+1]=plateheight;
 
   for(i=stepend+2; i<=imax; i++) {
-    y[i]=0.1;
+    y[i]=plateheight;
     x[i]=i*dx;
   }
 
