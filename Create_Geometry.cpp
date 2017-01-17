@@ -46,35 +46,28 @@ output();
 
 void generatepoints(void) {
 
-  int stepstart=3, stepend=5, i;
-  double plateheight=0.5, stepheight=2, dx=10/imax;
+  int steptop=3, stepend=5, i;
+  double stepheight=2, dx=10/imax;
   x[0]=0;
   y[0]=0;
-  x[1]=0;
-  y[1]=plateheight;
 
-  for (i=2; i<stepstart; i++) {
-    y[i]=plateheight;
-    x[i]=(i-1)*dx;
+
+  for (i=1; i<=steptop; i++) {
+    y[i]=stepheight*(1.0*i/steptop);
+    x[i]=0;
   }
 
-  y[stepstart]=plateheight+stepheight;
-  x[stepstart]=x[stepstart-1];
-
-  for (i=stepstart+1; i<=stepend; i++) {
-    y[i]=plateheight+stepheight;
-    x[i]=(i-2)*dx;
+  for (i=steptop+1; i<=stepend; i++) {
+    y[i]=stepheight;
+    x[i]=(i-steptop)*dx;
   }
 
-  x[stepend+1]=x[stepend];
-  y[stepend+1]=plateheight;
-
-  for(i=stepend+2; i<=imax; i++) {
-    y[i]=plateheight;
-    x[i]=i*dx;
+  for(i=stepend+1; i<=imax; i++) {
+    y[i]=stepheight*(1-(1.0*i-stepend)/steptop);;
+    x[i]=x[i-1];
   }
 
-  x[imax+1]=x[imax];
+
 
 }
 
@@ -174,24 +167,24 @@ void output(void)	{
 		std::ofstream myfile;
 		myfile.open ("geometry.step");
 		myfile << "dummy 2d line test" << endl << endl;
-		myfile << imax+2 << " points" << endl;
-    myfile << imax+2 << " lines" << endl << endl;
+		myfile << imax+1 << " points" << endl;
+    myfile << imax+1 << " lines" << endl << endl;
 
     myfile << "Points" << endl << endl;
     // Write point values to text file.
 
-    for  (i=0; i<=imax+1; i++)
+    for  (i=0; i<=imax; i++)
 			{
         myfile << i+1 << " " << x[i] << " " << y[i] << " " << endl;
       }
 
     // Write line ID values to text file
     myfile << endl << "Lines" << endl << endl;
-    for (i=0; i<=imax; i++) {
+    for (i=0; i<imax; i++) {
       myfile << i+1 << " " << i+1 << " " << i+2 << endl;
     }
 
-    myfile << imax+2 << " " << imax+2 << " " << "1" << endl;
+    myfile << imax+1 << " " << imax+1 << " " << "1" << endl;
 
 }
 
