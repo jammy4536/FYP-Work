@@ -22,12 +22,12 @@ void parameterise(void);    //PARAMETERISE GEOMETRY FOR DEFORMATIVE METHOD
 void output(void);          //OUTPUT POINTS TO A FILE
 int ind(int, int);          //index function
 
-int imax=8, jmax=2, m= 10, n=2;
+int imax=8, m=2, n=2;
 
 
 
-double *x = (double *) calloc(imax+1, sizeof(double));
-double *y = (double *) calloc(imax+1, sizeof(double));
+double *x = (double *) calloc(imax, sizeof(double));
+double *y = (double *) calloc(imax, sizeof(double));
 
 double *xbar = (double *) calloc(m, sizeof(double));
 double *ybar = (double *) calloc(n, sizeof(double));
@@ -48,6 +48,10 @@ void generatepoints(void) {
 
   int steptop=3, stepend=5, i;
   double stepheight=2, dx=10/imax;
+
+
+
+  /*
   x[0]=0;
   y[0]=0;
 
@@ -66,8 +70,17 @@ void generatepoints(void) {
     y[i]=stepheight*(1-(1.0*i-stepend)/steptop);;
     x[i]=x[i-1];
   }
+  */
 
+  double theta=0, dtheta=2*M_PI/(imax);
 
+  for (i=0; i<=imax; i++) {
+    x[i]=0.5*(1+sin(theta));
+    y[i]=0.5*(1+cos(theta));
+
+    theta+=dtheta;
+    //cout<< x[i] << " " << y[i] << endl;
+  }
 
 }
 
@@ -76,41 +89,26 @@ void parameterise(void){
   /* PARAMETERISE USING BEZIER CURVES */
   int i, j, k, g;
   double ymax=*std::max_element(y, y+imax), xmax=*std::max_element(x, x+imax);
-  double mfac=1, ifac=1, nfac=1, jfac=1, xfac, yfac, factorial;
+  double ymin=*std::min_element(y,y+imax), xmin=*std::min_element(x,x+imax);
+  double mfac=1, ifac=1, nfac=1, jfac=1, xfac, yfac, factorial, s, t;
+  double xadd, yadd, xadded, yadded;
 
-
-  double *s = (double *) calloc(m, sizeof(double));
-  double *t = (double *) calloc(n, sizeof(double));
   double *px = (double *) calloc(m, sizeof(double));
   double *py = (double *) calloc(n, sizeof(double));
-  double *Bx = (double *) calloc(m, sizeof(double));
-  double *By = (double *) calloc(n, sizeof(double));
+  int narraylength=imax*(1+m);
+  double *Bx = (double *) calloc(narraylength, sizeof(double));
+  narraylength=imax*(n+1);
+  double *By = (double *) calloc(narraylength, sizeof(double));
 
   std::ofstream myfile;
   myfile.open ("parameterisation.txt");
-  //myfile << "Ymax: " << ymax << " Xmax: " << xmax << endl;
-  myfile << "Parameter Space Coordinates" << endl;
+  myfile << "Ymax: " << ymax << " Xmax: " << xmax << " Ymin: " << ymin << " Xmin: " << xmin << endl;
+  //myfile << "Parameter Space Coordinates" << endl;
 
   myfile << std::fixed;
   myfile << std::setprecision(3);
 
 
-  for (i=0; i<=m; i++) {
-    for (j=0; j<=n; j++){
-
-      // Find the rectangular parameterisation box
-      px[i]=x[0]+1.0*i/m*(xmax-x[0]);
-      py[j]=y[0]+1.0*j/n*(ymax-y[0]);
-
-      //Find the intermediate normalised coordinates.
-      s[i]=(x[i]-y[0])/(ymax-y[0]);
-      t[j]=(y[i]-x[0])/(xmax-x[0]);
-      myfile << px[i] << " " << py[j] << " " << s[i] << " " << t[j] << endl;
-    }
-  }
-
-  //myfile << endl << "M and N factorials" << endl;
-  //Find the factorials of m and n
   for (k=1; k<=m; k++){
     mfac*=k;
   }
@@ -118,72 +116,132 @@ void parameterise(void){
     nfac*=k;
   }
 
-  //myfile << mfac << " " << nfac << endl;
-  myfile << endl << "Berstein Polynamials at each i & j value" << endl;
+  myfile << "M factorial: " << mfac << " N Factorial " << nfac << endl;
 
-  //Find the Bernstein Polynomials of s and t.
-  for (j=0; j<=n; j++) {
-    for (i=0; i<=m; i++) {
+  for (i=0; i<=m; i++) {
+      // Find the rectangular parameterisation box
+      px[i]=xmin+1.0*i/m*(xmax-xmin);
 
 
-        //Find the factorial of i at point g.
-        ifac=1;
-        for (k=1; k<=i; k++){
-          ifac*=k;
-        }
+      //Find the factorial of i at point g.
+      ifac=1;
+      for (k=1; k<=i; k++){
+        ifac*=k;
+      }
 
-        factorial=1;
-        for (k=1; k<= m-i; k++)
-          factorial*=k;
+      factorial=1;
+      for (k=1; k<= m-i; k++)
+        factorial*=k;
 
-        //Find x combination m (m!/(i!(m-i)!))
-        if (ifac==mfac)
-          xfac=1;
-        else
-        xfac=mfac/(ifac*factorial);
+      //Find i combination m (m!/(i!(m-i)!))
+      if (ifac==mfac)
+        xfac=1;
+      else
+      xfac=mfac/(ifac*factorial);
 
+
+      for (g=0; g<=imax; g++) {
+        //Find the intermediate normalised coordinates.
+        s=(x[g]-xmin)/(xmax-xmin);
         //Find the Bernstein Polynomial for each i value.
-        Bx[i]= xfac*pow(s[i],i)*pow(1-s[i],m-i);
+        Bx[ind(g,i)]=0;
+        Bx[ind(g,i)]= xfac*pow(s,i)*pow(1-s,m-i);
 
 
-        //Find the factorial of j at point g
-        jfac=1;
-        for (k=1; k<=j; k++){
-          jfac*=k;
-        }
+      }
 
-        factorial=1;
-        for (k=1; k<= n-j; k++)
-          factorial*=k;
+  }
 
-        //Find y combination m (m!/(i!(m-i)!))
-        if (jfac==nfac)
-          yfac=1;
-        else
-        yfac=nfac/(jfac*factorial);
+  //myfile << endl << "Y-Berstein Polynamials" << endl;
+  for (j=0; j<=n; j++){
+    py[j]=ymin+1.0*j/n*(ymax-ymin);
 
-        By[j]= yfac*pow(t[j],j)*pow(1-t[j],n-j);
+    //Find the factorial of j at point g
+    jfac=1;
+    for (k=1; k<=j; k++){
+      jfac*=k;
+    }
 
-        myfile << i << " " << j << " " << xfac << " " << Bx[i] << " " << yfac << " " << By[j] << endl;
+    factorial=1;
+    for (k=1; k<= n-j; k++)
+      factorial*=k;
+
+    //Find y combination m (m!/(i!(m-i)!))
+    if (jfac==nfac)
+      yfac=1;
+    else
+    yfac=nfac/(jfac*factorial);
+
+    for (g=0; g<=imax; g++) {
+
+      t=(y[g]-ymin)/(ymax-ymin);
+      By[ind(g,j)]=0;
+      By[ind(g,j)]= yfac*pow(t,j)*pow(1-t,n-j);
+
+      //myfile << jfac << " " << yfac << " " << By[ind(g,j)] << endl;
     }
   }
-  myfile << endl << "X & Y coordinates in the parameter space" << endl;
-  for (i=0; i<=imax; i++){
-    for (j=0;j<=jmax;j++) {
-      for (g=0; g<=m; g++){
-        for(k=0; k<=n; k++) {
 
-          xbar[i]+=Bx[g]*By[k]*px[g];
-          ybar[j]+=Bx[g]*By[k]*py[k];
+  myfile << endl << "parameterisation Box coordinates" << endl;
+  for (i=0; i<=m; i++) {
+    for (j=0; j<=n; j++) {
+      myfile << px[i] << " " << py[j] << endl;
+    }
+  }
+
+
+  myfile << endl << "Berstein Polynamials at each i & j value" << endl;
+  myfile << endl << "g   i  X-Berstein Polynamials j  Y-Berstein Polynamials" << endl;
+  for (g=0; g<=imax; g++) {
+      for (j=0; j<=n; j++) {
+        i=j;
+        myfile << g << "   " << i << "         " << Bx[ind(g,i)] <<  "           " << j << "         " << By[ind(g,j)] << endl;
+      }
+  }
+
+  myfile<< endl << "Xbar and Ybar, prior to filling:" << endl;
+  for (g=0; g<=imax; g++) {
+    myfile << xbar[g] << " " << ybar[g] << endl;
+  }
+
+  myfile << endl << "g   i   j   Bx[g,i]*By[g,j]*Px[i]   Bx[g,i]*By[g,j]*Py[j]" << endl;
+
+  //myfile << endl << "X & Y coordinates in the parameter space" << endl;
+  //myfile << "g xbar  ybar  x     y      x-xb  y-yb" << endl;
+
+  for (g=0; g<=imax; g++){
+    xbar[g]=0.0;
+    ybar[g]=0.0;
+    xadded=0;
+    yadded=0;
+    
+      for (j=0; j<=n; j++){
+        for(i=0; i<=m; i++){
+          xadd=Bx[ind(g,i)]*By[ind(g,j)]*px[i];
+          yadd=Bx[ind(g,i)]*By[ind(g,j)]*py[j];
+          myfile << g << "   " << i << "   " << j << "         " << xadd << "                  " << yadd << endl;
+          //cout << g << " " << Bx[ind(g,i)]*By[ind(g,j)]*px[i] << " " << Bx[ind(g,i)]*By[ind(g,j)]*py[j] << endl;
+          if (xadd!=0)
+          xadded+=xadd;
+
+          if (yadd!=0)
+          yadded+=yadd;
+
+          //myfile << g << " "  << xbar[g] << " " << ybar[g] << " " << Bx[ind(g,i)]*By[ind(g,j)]*px[i] << " " << Bx[ind(g,i)]*By[ind(g,j)]*py[j] << " " << x[g]-xbar[g] << " " << y[g]-ybar[g] << endl;
 
         }
       }
+      xbar[g]=xadded;
+      ybar[g]=yadded;
+      //myfile << g << " " << xbar[g] << " " << ybar[g] << " " << x[g] << " " << y[g] << " " << x[g]-xbar[g] << " " << y[g]-ybar[g] << endl;
 
-      myfile << xbar[i] << " " << ybar[j] << endl;
 
 
-    }
   }
+
+  myfile << endl << "X & Y coordinates in the parameter space" << endl;
+  for (g=0; g<=imax; g++)
+  myfile << g << "      " << xbar[g] << "      " << ybar[g] << "      " << x[g] << "      " << y[g] << "     " << x[g]-xbar[g] << "      " << y[g]-ybar[g] << endl;
 
   myfile.close();
 }
