@@ -1,32 +1,49 @@
-function [F, P] = getforces
-ff= fopen('Forces_Output/forces.1000.surf', 'r');
-
+function [F, P] = getforces(xbar)
 %% Get the surface forces and pressures
-for k=1:9
-    bleh=fgets(ff);
-end
+global imax;
 
-sizeA=[5 Inf];
-A=fscanf(ff, '%i %f %f %f %f', sizeA);
+A=dlmread('Forces_Output/forces.1000.surf',' ',9,1);
+%A=[Surface_ID, f-x, f-y, P-x, P-y]
+%Input the values from A into a force and pressure vector array
+F(:,1)=A(:,1);
+F(:,2)=A(:,2);
+P(:,1)=A(:,3);
+P(:,2)=A(:,4);
 
-F=A(2:3,:);
-P=A(4:4,:);
 
-F=F';
-P=P';
+
+%% Get the Boundary forces (in a separate file)
+%Open the boundary output file
+B= dlmread('Forces_Output/Boundary.surf',' ',4,1);
+%B= [bound_ID, n particles, Normal pressure, Shear-x, shear-y] 
 
 [a, ~]= size(P);
-%% Get the Boundary forces (in a separate file)
+P(a+1,1)=0;
+P(a+1,2)=B(1,2);
 
-bf = fopen('Forces_Output/Boundary.surf','r');
-for f=1:4
-    bleh=fgets(bf);
+%% Get the forces on the boundary from the pressure
+%Need the area however in order to get the normal force.
+%Tangential force (x-direction) is the shear force in array B
+%Open in.step to get the box dimensions
+is= fopen('in.step', 'r');
+
+%Skip through to the create_box command
+for f=1:9
+    bleh=fgets(is);
 end
-sizeB=[5 1];
-B= fscanf(bf, '%i %f %f %f %f', sizeB);
 
-P(a+1,:)=[0 B(2)];
-
+%Read the line, ignoring the create_box text
+sizeC=[6 1];
+C= fscanf(is, ['create_box' '%f %f %f %f %f %f'], sizeC);
 fclose('all');
+%C=[start x, end x, start y, end y, start z, end z]
+%F=P*Area
+% D=(C(2,1)-C(1,1))-(xbar(imax+1,1)-xbar(1,1)); 
+D=(C(2,1)-C(1,1))-(xbar(imax+1,1)-xbar(1,1));
+fbound=P(a+1,2)*D;
+F(a+1,1)=B(1,4);
+F(a+1,2)=-fbound;
+
+
 
 

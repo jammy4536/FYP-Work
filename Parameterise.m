@@ -1,4 +1,4 @@
-function [xbar, ybar] = Parameterise(x, y, Pi, Pj)
+function [xbar, ybar] = Parameterise(x, y, PI,PJ)
 %% Parameterise the geometry
 global xmin xmax ymin ymax imax m n;
 %Parameterised coordinate arrays
@@ -40,11 +40,14 @@ end
 for i=1:imax+1
     for g=0:m
         for k=0:n
-            xbar(i)=xbar(i)+Bx(i,g+1)*By(i,k+1)*Pi(g+1);
-            ybar(i)=ybar(i)+Bx(i,g+1)*By(i,k+1)*Pj(k+1);
+            xbar(i)=xbar(i)+Bx(i,g+1)*By(i,k+1)*PI(k+1,g+1);
+            ybar(i)=ybar(i)+Bx(i,g+1)*By(i,k+1)*PJ(k+1,g+1);
         end
     end
 end
+
+% figure;
+% plot(xbar,ybar);
             
             
             

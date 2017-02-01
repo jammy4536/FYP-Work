@@ -1,12 +1,15 @@
-function [x,y] = Create_Geometry()
+function [x,y] = Create_Geometry(stepheight, steplength)
 %% Create the geometry to be parameterised
 global imax;
 
 %% Box Parameters 
-stepstart=4; %points until box top
-stepend=6; %point from start until box end
-stepheight=2; %box height
-dx=stepheight/(stepend-stepstart); %the change in x to get the necessary distance
+stepfront=4; %points on the box front
+stepback=4;  %points on the box back
+steptop=2;   %points on the box top
+imax=stepfront+stepback+steptop;
+dx=steplength/steptop; %the change in x to get the necessary distance
+dyf=stepheight/stepfront;   %the change in y on the front to get the box
+dyb=stepheight/stepback;    %change in y on be back
 
 x=zeros(imax+1,1);
 y=zeros(imax+1,1); 
@@ -14,25 +17,28 @@ y=zeros(imax+1,1);
 
 %% Front of the Box
 %want x(0) and y(0) to be 0, so leave untouched
-for i=2:stepstart+1 
-    y(i)=stepheight*((i-1)/stepstart);
-    x(i)=0;
+for i=2:stepfront+1 
+    y(i)=(i-1)*dyf;
 end
 
 %% Top of the Box
 k=1;
-for i=stepstart+2:stepend+1
+for i=stepfront+2:stepfront+steptop+1
     y(i)=stepheight;
     x(i)=k*dx;
     k=k+1;
 end
 
 %% Back of the Box
-for i=stepend+2:imax+1
-    y(i)=stepheight*(1-(i-1-stepend)/stepstart);
-    x(i)=x(i-1);
+k=1;
+for i=stepfront+steptop+2:imax+1
+    y(i)=stepheight-dyb*k;
+    x(i)=steplength;
+    k=k+1;
 end
 
+% figure;
+% plot(x,y);
 
 %% Parameterisation Test Geometry (Circle)
 % theta=0;
