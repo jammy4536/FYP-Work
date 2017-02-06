@@ -7,31 +7,27 @@ global        gridcut 0.0 comm/sort yes
 boundary	    so o p
 
 
-create_box  	    0 100 0 15 -0.5 0.5
+create_box  	    0 10.0 0 1.5 -0.5 0.5
 create_grid 	    800 300 1
 balance_grid        rcb cell
 
-global		    nrho 1.42e16 fnum 3e11
+global		    nrho 2.5416e16 fnum 3e11
 
 species		    air.species O2 N2 H O He &
 #H+ O+
 
 #Can either define mixture ppm^3, or define global ppm^3 and mixture fractions.
-mixture		    air vstream 7810 0 0
-mixture		    air O2 nrho 1.43198E+15
-#mixture       air O2+ nrho
-mixture		    air N2 nrho 1.31720E+16
-#mixture       air N2+ nrho
-mixture		    air H nrho 5.84116E+11
-#mixture       air H+ nrho
-mixture		    air O nrho 1.22846E+16
-#mixture       air O+ nrho
-mixture		    air He nrho 3.04541E+13
-mixture		    air temp 641.334
+mixture air vstream 7810 0 0
+mixture air O2 nrho 1.79094E+15
+mixture air N2 nrho 1.73923E+16
+mixture air H nrho 2.34525E+11
+mixture air O nrho 6.22544E+15
+mixture air He nrho 7.23737E+12
+mixture air temp 745.61938
 
 
 read_surf	    geometry.step &
-trans 40.0 0.0 0 &
+trans 4.00 0.0 0 &
 scale 1 1 1
 
 #Check energy accommodation factor (v this number). normally between 0.5 and 0.9
@@ -46,7 +42,7 @@ fix		    in emit/face air xlo
 
 
 
-timestep 	    0.0001
+timestep 	    0.01
 
 dump                2 image all 100 Pictures/image.*.ppm type type pdiam 0.1 &
                     surf proc 0.01 size 5024 5024 axes yes 0.9 0.02
