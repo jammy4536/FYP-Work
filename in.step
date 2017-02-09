@@ -11,7 +11,7 @@ create_box  	    0 10.0 0 1.5 -0.5 0.5
 create_grid 	    800 300 1
 balance_grid        rcb cell
 
-global		    nrho 2.5416e16 fnum 3e11
+global		    nrho 2.5416e16 fnum 5e7
 
 species		    air.species O2 N2 H O He &
 #H+ O+
@@ -27,7 +27,7 @@ mixture air temp 745.61938
 
 
 read_surf	    geometry.step &
-trans 4.00 0.0 0 &
+trans 4.0 0.0 0 &
 scale 1 1 1
 
 #Check energy accommodation factor (v this number). normally between 0.5 and 0.9
@@ -42,9 +42,9 @@ fix		    in emit/face air xlo
 
 
 
-timestep 	    0.01
+timestep 	    0.0001
 
-dump                2 image all 100 Pictures/image.*.ppm type type pdiam 0.1 &
+dump                2 image all 1000 Pictures/image.*.ppm type type pdiam 0.1 &
                     surf proc 0.01 size 5024 5024 axes yes 0.9 0.02
 dump_modify	        2 pad 4
 

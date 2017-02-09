@@ -4,8 +4,8 @@ close all; clear all;
 
 %% Define the Variables
 global xmax xmin ymax ymin imax m n;
-stepheight=0.2;
-steplength=0.5;
+stepheight=0.05;
+steplength=0.01;
 m=2;    %Number of x parameter points
 n=1;    %Number of y parameter points
 
@@ -13,8 +13,8 @@ n=1;    %Number of y parameter points
 %% Create the Geometry
 %Create the starting geometry, to create the parameter points, and
 %beginning geometry. This will not be inside the optimisation loop.
-%i=1;
-%for stepheight=0.5:0.5:4
+% i=1;
+% for stepheight=0.05:0.05:0.4
 [x,y]=Create_Geometry(stepheight,steplength);
 
 %% Create the Control Points
@@ -38,15 +38,20 @@ Write_Geometry(xbar, ybar)
 %!make process_Overall
 %!make process_Species
 [F, P] = getforces(xbar);
-[SurfSpecies,SurfDens]=getSurfaceSpecies;
 
-%% Plot Data from SPARTA
-Produce_Graphs(SurfSpecies,SurfDens)
-% 
 % %% Optimise The shape... (To come soon)
-%D(i)= sum(F(:,1));
+% D(i)= sum(F(:,1));
 % stepplot(i)=stepheight;
-% i=i+1;
+%  i=i+1;
 % end
 
-%plot(stepplot,D)
+%% Plot Data from SPARTA
+[SurfSpecies,SurfDens]=getSurfaceSpecies;
+Produce_Graphs(SurfSpecies,SurfDens);
+% figure;
+% plot(stepplot,D)
+% grid on;
+% ylabel('Drag (N)'); xlabel('Protrusion height (m)');
+% title('Protrusion height vs drag, for protrusion length=0.1m');
+
+
