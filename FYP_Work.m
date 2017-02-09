@@ -32,7 +32,7 @@ n=1;    %Number of y parameter points
 Write_Geometry(xbar, ybar)
 
 %% Run SPARTA
-!./spa_serial <in.step
+!mpirun -np 6 ./spa_g++ <in.step
 
 %% Convert Data from SPARTA
 %!make process_Overall

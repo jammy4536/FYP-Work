@@ -7,11 +7,11 @@ global        gridcut 0.0 comm/sort yes
 boundary	    so o p
 
 
-create_box  	    0 10.0 0 1.5 -0.5 0.5
+create_box  	    0 4.0 0 2 -0.5 0.5
 create_grid 	    800 300 1
 balance_grid        rcb cell
 
-global		    nrho 2.5416e16 fnum 5e7
+global		    nrho 2.5416e16 fnum 5e10
 
 species		    air.species O2 N2 H O He &
 #H+ O+
@@ -27,7 +27,7 @@ mixture air temp 745.61938
 
 
 read_surf	    geometry.step &
-trans 4.0 0.0 0 &
+trans 2.0 0.0 0 &
 scale 1 1 1
 
 #Check energy accommodation factor (v this number). normally between 0.5 and 0.9
@@ -62,7 +62,7 @@ compute 	    3 surf all air fx fy &
 px py shx shy
 fix 		      3 ave/surf all 10 100 1000 c_3[*] ave one
 dump          3 surf all 1000 Forces_Output/forces.*.surf id f_3[*]
-
+dump_modify 3 buffer yes
 compute       5 boundary air n &
 press shx shy
 fix           5 ave/time 10 100 1000 c_5[*] mode vector file Forces_Output/Boundary.surf

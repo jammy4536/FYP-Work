@@ -16,7 +16,7 @@ fclose('all');
 %% Get the values of species density on the SC surface (boundary)
 tempSurfSpecies=dlmread('Species_Density_Output/speciesdens.1000.grid', ' ', [9 0 8+C(1) 6]);
 tempSurfDens=dlmread('Overall_Density_Output/pdens.1000.grid', ' ', [9 0 8+C(1) 2]);
-for j=1:10
+for j=1:1
 SurfSpecies(1,:)=(tempSurfSpecies(1,:)+tempSurfSpecies(2,:))/2;
 SurfSpecies(C(1),:)=(tempSurfSpecies(C(1)-1,:)+tempSurfSpecies(C(1),:))/2;
 SurfDens(1,:)=(tempSurfDens(1,:)+tempSurfDens(2,:))/2;
