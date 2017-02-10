@@ -7,11 +7,11 @@ global        gridcut 0.0 comm/sort yes
 boundary	    so o p
 
 
-create_box  	    0 4.0 0 2 -0.5 0.5
+create_box  	    0 5.0 0 2 -0.5 0.5
 create_grid 	    800 300 1
 balance_grid        rcb cell
 
-global		    nrho 2.5416e16 fnum 5e10
+global		    nrho 2.5416e16 fnum 8e7
 
 species		    air.species O2 N2 H O He &
 #H+ O+
@@ -30,6 +30,8 @@ read_surf	    geometry.step &
 trans 2.0 0.0 0 &
 scale 1 1 1
 
+
+
 #Check energy accommodation factor (v this number). normally between 0.5 and 0.9
 surf_collide	    1 diffuse 300.0 0.9
 surf_modify         all collide 1
@@ -40,29 +42,32 @@ collide             vss air air.vss
 fix		    in emit/face air xlo
 
 
-
-
 timestep 	    0.0001
+
+
 
 dump                2 image all 1000 Pictures/image.*.ppm type type pdiam 0.1 &
                     surf proc 0.01 size 5024 5024 axes yes 0.9 0.02
 dump_modify	        2 pad 4
 
-compute             1 grid air nrho
-fix 		            1 ave/grid 10 100 1000 c_1[1]
-dump 		            1 grid all 1000 Overall_Density_Output/pdens.*.grid xlo ylo f_1
+#Overall Density Dump
+compute          1 grid air nrho
+fix 		     1 ave/grid 10 100 1000 c_1[*]
+dump 		     1 grid all 1000 Overall_Density_Output/pdens.*.grid id xlo ylo f_1 proc
 
-#BROKEN BIT (DENSITY OF EACH PARTICLE)
-compute 	     2 grid species nrho
-fix 		       2 ave/grid 10 100 1000 c_2[*]
-dump		       species grid all 1000 Species_Density_Output/speciesdens.*.grid xlo ylo f_2[*]
+#Species Density Dump
+compute 	     2 grid species nrho 
+fix 		     2 ave/grid 10 100 1000 c_2[*]
+dump		     species grid all 1000 Species_Density_Output/speciesdens.*.grid id xlo ylo f_2[*] proc
 
-#ALSO BROKEN BIT (SURFACE DUMP)
-compute 	    3 surf all air fx fy &
+#Surface Force dump
+compute 	     3 surf all air fx fy &
 px py shx shy
-fix 		      3 ave/surf all 10 100 1000 c_3[*] ave one
-dump          3 surf all 1000 Forces_Output/forces.*.surf id f_3[*]
-dump_modify 3 buffer yes
+fix 		     3 ave/surf all 10 100 1000 c_3[*] ave one
+dump             3 surf all 1000 Forces_Output/forces.*.surf id f_3[*]
+#dump_modify      3 buffer yes
+
+#Boundary dump
 compute       5 boundary air n &
 press shx shy
 fix           5 ave/time 10 100 1000 c_5[*] mode vector file Forces_Output/Boundary.surf

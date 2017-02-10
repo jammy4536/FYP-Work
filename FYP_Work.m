@@ -3,7 +3,9 @@ close all; clear all;
 !synclient HorizTwoFingerScroll=0
 
 %% Define the Variables
-global xmax xmin ymax ymin imax m n;
+global xmax xmin ymax ymin imax m n Oaverage steplength stepheight;
+xmax=0; ymax=0; xmin=0; ymin=0; imax=0; Oaverage=0;
+
 stepheight=0.05;
 steplength=0.01;
 m=2;    %Number of x parameter points
@@ -32,7 +34,9 @@ n=1;    %Number of y parameter points
 Write_Geometry(xbar, ybar)
 
 %% Run SPARTA
+
 !mpirun -np 6 ./spa_g++ <in.step
+%!./spa_serial <in.step
 
 %% Convert Data from SPARTA
 %!make process_Overall
@@ -46,8 +50,11 @@ Write_Geometry(xbar, ybar)
 % end
 
 %% Plot Data from SPARTA
-[SurfSpecies,SurfDens]=getSurfaceSpecies;
+%Get the surface densities on the boundary (cba with the block)
+[SurfSpecies,SurfDens,ShadowLength]=getSurfaceSpecies;
 Produce_Graphs(SurfSpecies,SurfDens);
+
+
 % figure;
 % plot(stepplot,D)
 % grid on;
