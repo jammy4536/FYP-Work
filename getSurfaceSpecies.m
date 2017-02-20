@@ -1,6 +1,6 @@
-function [SurfSpecies,SurfDens,ShadowLength] = getSurfaceSpecies
-global Oaverage steplength;
-steplength=0.01;
+function [SurfSpecies,SurfDens] = getSurfaceSpecies
+global C Oaverage steplength timestep;
+%steplength=0.01;
 %% Find how many points in x-direction
 is= fopen('in.step', 'r');
 
@@ -13,26 +13,21 @@ end
 sizeC=[3 1];
 C= fscanf(is, ['create_grid' '%f %f %f'], sizeC);
 
-%Skip through to the trans command
-%Starting from line 12 to line 29
-for f=1:19
-    bleh=fgets(is);
-end
-sizeB=[3 1];
-%Read the line, ignoring the trans text
-B= fscanf(is, ['trans' '%f %f %f'], sizeB);
-
 fclose('all');
 
 SurfSpecies=zeros(C(1),6);
 SurfDens=zeros(C(1),2);
 
 %% Get the values of species density on the SC surface (boundary)
-tempSurfSpecies=dlmread('Species_Density_Output/speciesdens.1000.grid',' ',9,0);
-tempSurfDens=dlmread('Overall_Density_Output/pdens.1000.grid', ' ', 9,0);
+SpeciesName=sprintf('/dev/shm/speciesdens.%.0f.grid',timestep);
+tempSurfSpecies=dlmread(SpeciesName,' ',9,0);
 temp=sortrows(tempSurfSpecies);
+clear tempSurfSpecies;
+
+OverallName=sprintf('/dev/shm/pdens.%.0f.grid',timestep);
+tempSurfDens=dlmread(OverallName, ' ', 9,0);
 temp2=sortrows(tempSurfDens);
-clear tempSurfSpecies tempSurfDens;
+clear tempSurfDens;
 
 tempSurfSpecies(:,1)=temp(1:C(1),2);
 tempSurfSpecies(:,2:6)=temp(1:C(1),4:8);
@@ -61,22 +56,30 @@ for j=1:3
     tempSurfDens=SurfDens;
 end
 
-%% Find the length of the shadow
+%% Write stuff to a new file
 
-Oaverage= SurfSpecies(C(1),5);
+%Define the folder path to output to...
+Filepath='/home/jamie/Dropbox/FYP Work/Software/sparta-8Sep16/FYP-Work/Density_Outputs/';
+File=sprintf('Species_%.0f.dat',timestep); %Add the timestep to the string
 
-%step through to find where the shadow begins
-i=1;
-while SurfSpecies(i,4)>0
-    i=i+1;
-end
-%get a bit of clearance to ensure its into the shadow
-i=i+5;
+%Add in the file name to open it
+Filename=strcat(Filepath,File);
+CFile=char(Filename); %Convert the string to a char array to pass to dlmwrite
+speciesout= fopen(CFile,'w+'); %open the file
 
-%step through to find when the atomic oxygen is greater than 10% of FS
-while SurfSpecies(i,5)<=Oaverage*0.10
-    i=i+1;
-end
+%Write the starting line, so that tecplot can read it
+fwrite(speciesout, 'VARIABLES = ID X Y O2 N2 H O He\n');
+dlmwrite(CFile, temp,'-append','delimiter',' ','roffset',1); %output the array
+fclose(speciesout);
 
-ShadowLength=SurfSpecies(i,1)-2-steplength;
+%rewrite it for the overall density
+File=sprintf('Overall_Density_%.0f.dat',timestep);
+%Add in the file name to open it
+Filename=strcat(Filepath,File);
+CFile=char(Filename); %Convert the string to a char array to pass to dlmwrite
+densout= fopen(Filename,'w+'); %open the file
+fwrite(densout, 'VARIABLES = ID X Y Density\n');
+dlmwrite(CFile, temp2,'-append','delimiter',' ','roffset',1);
+fclose(densout);
+
 

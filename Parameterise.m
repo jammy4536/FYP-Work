@@ -46,8 +46,8 @@ for i=1:imax+1
     end
 end
 
-% figure;
-% plot(xbar,ybar);
+figure;
+plot(xbar,ybar);
             
             
             
