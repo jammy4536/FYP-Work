@@ -6,7 +6,7 @@ close all; clear all;
 global C xmax xmin ymax ymin imax m n Oaverage steplength stepheight timestep;
 xmax=0; ymax=0; xmin=0; ymin=0; imax=0; Oaverage=0; C=[0 0 0]; 
 
-timestep=150;
+timestep=100;
 
 stepheight=0.05;
 steplength=0.01;
@@ -28,9 +28,10 @@ n=1;    %Number of y parameter points
 [PI,PJ]=getparamCP(x,y);
 
 %Deform the control points to start getting different shapes
-PI(1,1)=0.5*(PI(1,2)-PI(1,1));
-PJ(1,1)=0.5*(PJ(2,1)-PJ(1,1));
-
+ PI(2,1)=0.5*(PI(1,2)-PI(1,1));
+ %PJ(2,1)=0.5*(PJ(2,1)-PJ(1,1));
+ PI(2,2)=0.6*(PI(1,2)-PI(1,1));
+ PJ(2,2)=0.8*PJ(2,1);
 %% Create the Geometry with parameterisation
 %This will be the start of the optimisation loop, through taking the
 %current geometry, and then stretching it with the new control points that
@@ -47,20 +48,16 @@ Write_Geometry(xbar, ybar);
 makeinputf;
 
 %% Run SPARTA
-
 !mpirun -np 5 ./spa_g++ <in.step
-%!./spa_serial <in.step
 
 %% Convert Data from SPARTA
-%!make process_Overall
-%!make process_Species
 [F, P] = getforces;
+[SurfSpecies,SurfDens]=getSurfaceSpecies;
 
 % %% Optimise The shape... (To come soon)
 % D(j)= sum(F(:,1));
 % stepplot(j)=stepheight;
 
-[SurfSpecies,SurfDens]=getSurfaceSpecies;
 %% Find the length of the shadow
 
 %step through to find where the shadow begins
@@ -89,18 +86,16 @@ ShadowLength=SurfSpecies(i,1)-2-steplength;
 % D(j)= sum(F(:,1));
 % j=j+1;
 % end
+Drag=sum(F(:,1));
 
 %% Plot Data from SPARTA
 %Get the surface densities on the boundary (cba with the block)
 
 Produce_Graphs(SurfSpecies,SurfDens);
 
-
 % end
-
  
- 
-% %% Plot Drag and Shadow length
+%% Plot Drag and Shadow length
 % 
 % Dfig=figure('Name','Drag & Step Length','NumberTitle','off','Color','White');
 % %Set the standard colors to black for the axes and let the legend show

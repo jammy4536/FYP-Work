@@ -3,9 +3,9 @@ function [x,y] = Create_Geometry(stepheight, steplength)
 global imax;
 
 %% Box Parameters 
-stepfront=4; %points on the box front
-stepback=4;  %points on the box back
-steptop=2;   %points on the box top
+stepfront=2; %points on the box front
+stepback=2;  %points on the box back
+steptop=3;   %points on the box top
 imax=stepfront+stepback+steptop;
 dx=steplength/steptop; %the change in x to get the necessary distance
 dyf=stepheight/stepfront;   %the change in y on the front to get the box

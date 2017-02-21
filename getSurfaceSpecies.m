@@ -1,12 +1,12 @@
 function [SurfSpecies,SurfDens] = getSurfaceSpecies
-global C Oaverage steplength timestep;
+global C timestep;
 %steplength=0.01;
 %% Find how many points in x-direction
 is= fopen('in.step', 'r');
 
 %Skip through to the create_box command
 for f=1:10
-    bleh=fgets(is);
+    bleh=fgets(is); %#ok<*NASGU>
 end
 
 %Read the line, ignoring the create_box text

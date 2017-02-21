@@ -1,12 +1,12 @@
 function [F, P] = getforces
 %% Get the surface forces and pressures
-global imax timestep steplength;
+global timestep steplength;
 
 is= fopen('in.step', 'r');
 
 %Skip through to the create_box command
 for f=1:77
-    bleh=fgets(is);
+    bleh=fgets(is); %#ok<*NASGU>
 end
 
 %Read the line, ignoring the create_box text
@@ -16,7 +16,7 @@ timestep= fscanf(is, ['run' '%f']);
 fclose('all');
 ForceName=sprintf('/dev/shm/forces.%.0f.surf',timestep);
 
-A=dlmread(ForceName,' ',9);
+A=dlmread(ForceName,' ',9,0);
 A=sortrows(A);
 %A=[f-x, f-y, P-x, P-y, S_x, S_y] (dlmread ignores ID)
 %Input the values from A into a force and pressure vector array
@@ -30,7 +30,7 @@ P(:,2)=A(:,5);
 %% Get the Boundary forces (in a separate file)
 %Open the boundary output file
 %Boundary.surf=[ID, n particles, Normal pressure, Shear-x, shear-y]
-B= dlmread('/dev/shm/Boundary.surf',' ',4);
+B= dlmread('/dev/shm/Boundary.surf',' ',4,0);
 B=sortrows(B);
 %B= [n particles, Normal pressure, Shear-x, shear-y] (dlmread ignores ID)
 

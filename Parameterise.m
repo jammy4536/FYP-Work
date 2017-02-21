@@ -46,8 +46,11 @@ for i=1:imax+1
     end
 end
 
-figure;
+figure('Name','Geometry Plot','NumberTitle','off','Color','White');
 plot(xbar,ybar);
+axis equal;
+xlabel('x (m)'); ylabel('y (m)');
+title('Protrusion Geometry');
             
             
             
