@@ -2,18 +2,7 @@ function [F, P] = getforces
 %% Get the surface forces and pressures
 global timestep steplength;
 
-is= fopen('in.step', 'r');
 
-%Skip through to the create_box command
-for f=1:77
-    bleh=fgets(is); %#ok<*NASGU>
-end
-
-%Read the line, ignoring the create_box text
-
-timestep= fscanf(is, ['run' '%f']);
-
-fclose('all');
 ForceName=sprintf('/dev/shm/forces.%.0f.surf',timestep);
 
 A=dlmread(ForceName,' ',9,0);

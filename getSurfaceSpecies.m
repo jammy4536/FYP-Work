@@ -56,30 +56,3 @@ for j=1:3
     tempSurfDens=SurfDens;
 end
 
-%% Write stuff to a new file
-
-%Define the folder path to output to...
-Filepath='/home/jamie/Dropbox/FYP Work/Software/sparta-8Sep16/FYP-Work/Density_Outputs/';
-File=sprintf('Species_%.0f.dat',timestep); %Add the timestep to the string
-
-%Add in the file name to open it
-Filename=strcat(Filepath,File);
-CFile=char(Filename); %Convert the string to a char array to pass to dlmwrite
-speciesout= fopen(CFile,'w+'); %open the file
-
-%Write the starting line, so that tecplot can read it
-fwrite(speciesout, 'VARIABLES = ID X Y O2 N2 H O He\n');
-dlmwrite(CFile, temp,'-append','delimiter',' ','roffset',1); %output the array
-fclose(speciesout);
-
-%rewrite it for the overall density
-File=sprintf('Overall_Density_%.0f.dat',timestep);
-%Add in the file name to open it
-Filename=strcat(Filepath,File);
-CFile=char(Filename); %Convert the string to a char array to pass to dlmwrite
-densout= fopen(Filename,'w+'); %open the file
-fwrite(densout, 'VARIABLES = ID X Y Density\n');
-dlmwrite(CFile, temp2,'-append','delimiter',' ','roffset',1);
-fclose(densout);
-
-
