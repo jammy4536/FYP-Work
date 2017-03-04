@@ -1,0 +1,4 @@
+Optimiser: Patternsearch
+Starting value: 0.500000 0.500000 0.750000 0.500000
+Drag0= 0.000012      Shadow0=0.303300
+Iteration No, J, Drag, Shadowlength, Xopt

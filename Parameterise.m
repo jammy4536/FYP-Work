@@ -1,6 +1,6 @@
 function [xbar, ybar] = Parameterise(x, y, PI,PJ)
 %% Parameterise the geometry
-global xmin xmax ymin ymax imax m n;
+global xmin xmax ymin ymax imax m n j;
 %Parameterised coordinate arrays
 xbar=zeros(imax+1,1);
 ybar=zeros(imax+1,1);
@@ -46,11 +46,12 @@ for i=1:imax+1
     end
 end
 
-figure('Name','Geometry Plot','NumberTitle','off','Color','White');
+figure('Name','Geometry Plot','Color','White');
 plot(xbar,ybar);
 axis equal;
 xlabel('x (m)'); ylabel('y (m)');
-title('Protrusion Geometry');
+geomtitle=sprintf('Protrusion Geometry (Iteration %i)',j);
+title(geomtitle);
             
             
             

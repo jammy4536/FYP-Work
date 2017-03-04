@@ -1,16 +1,14 @@
-function [fun]=Optimise(xopt)
-global C xmax xmin ymax ymin imax m n Oaverage steplength stepheight timestep;
-global normDrag normShad x y Paramstart PI PJ j;
+function J=Optimise(xopt,Paramstart,Drag0,Shadow0, PI,PJ,x,y)
+global C Oaverage steplength D Jstore ShadowL SurfSpecies SurfDens;
+global normDrag normShad j;
 
 %% Create the Geometry with parameterisation (Start of Opt Loop)
 %This will be the start of the optimisation loop, through taking the
 %current geometry, and then stretching it with the new control points that
 %have been changed by the optimiser, to create a new geometry to be tested. 
-% x0=[PI(2,1) PJ(2,1) PI(2,2) PJ(2,2) normShad];
-PI(2,1)=xopt(1)*Paramstart(1);
-PI(2,2)=xopt(3)*Paramstart(3);
-PJ(2,1)=xopt(2)*Paramstart(2);
-PJ(2,2)=xopt(4)*Paramstart(4);
+%display(xopt);
+[PI,PJ]=convertDV(xopt);
+PI(1,2)=0.01;
 
 [xbar,ybar]=Parameterise(x, y, PI, PJ);
 
@@ -57,19 +55,24 @@ while SurfSpecies(i,5)<=Oaverage*0.10
     end
 end
 
-ShadowLength=SurfSpecies(i,1)-1.5-steplength;
+ShadowLength=SurfSpecies(i,1)-1.5-steplength; %Shadow length
 
-Drag=sum(F(:,1));
-Drag0=1.22462e-05;
+Drag=sum(F(:,1));   %Drag=sum of forces in x-direction
+normShad=ShadowLength/Shadow0;
+
+ShadowPen=30*abs(1-normShad);
 
 %% End of Optimisation Loop.
 %Create the input arguments fun, x0, a, b
 %normalise drag and shadowlength
-D(j)=Drag;
+
 ShadowL(j)=ShadowLength;
 normDrag=Drag/Drag0;
-normShad=ShadowLength/0.3033;
-fun = normDrag/normShad;
-xopt(5)=normShad;
-F(j)=fun;
+
+%J = normDrag+ShadowPen
+J=normDrag/normShad;
+D(j)=Drag;
+Jstore(j)=J;
 j=j+1;
+fprintf('%i   %f   %f   %f   %f   %f   %f   %f',j,J,Drag,ShadowLength,xopt(:,1))
+

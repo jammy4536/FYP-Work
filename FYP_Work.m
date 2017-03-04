@@ -4,7 +4,7 @@ close all; clear all;
 
 %% Define the Variables
 global C xmax xmin ymax ymin imax m n Oaverage steplength stepheight timestep;
-global normDrag normShad x y Paramstart PI PJ j;
+global normDrag normShad j D Jstore ShadowL SurfSpecies SurfDens;
 xmax=0; ymax=0; xmin=0; ymin=0; imax=0; Oaverage=0; C=[0 0 0]; 
 
 timestep=1500;
@@ -18,7 +18,6 @@ n=1;    %Number of y parameter points
 %% Create the Geometry
 %Create the starting geometry, to create the parameter points, and
 %beginning geometry. This will not be inside the optimisation loop.
-
 
 [x,y]=Create_Geometry(stepheight,steplength);
 
@@ -36,22 +35,31 @@ n=1;    %Number of y parameter points
 Paramstart=[PI(2,1) PJ(2,1) PI(2,2) PJ(2,2)];
 j=1; 
 
-x0=[1 1 1 1 1];
-xopt=x0;
-A=[1 0 -1 0 0];
-b=0;
-Aeq=[0 0 0 0 1];
-beq=1;
-fun=@(xopt) Optimise(xopt);
-% 
-[Xopt,Jopt]=fmincon(fun,x0,A,b,Aeq,beq);
+%% Perform the Optimisation
+x0=[0.5 ;0.5; 0.75; 0.5];
+Drag0=1.22462e-05;
+Shadow0=0.3033;
 
+%Open a file to write optimisation progress to
+optf=fopen('Iteration_steps.txt','w+');
+fprintf(optf,'Optimiser: Patternsearch\n');
+fprintf(optf,'Starting value: %f %f %f %f\n',x0(:,1));
+fprintf(optf,'Drag0= %f      Shadow0=%f\n',Drag0,Shadow0);
+fprintf(optf,'Iteration No, J, Drag, Shadowlength, Xopt\n');
+
+%xopt=x0;
+A=[1 0 -1 0];
+b=0;
+%options=optimoptions('patternsearch','FiniteDifferenceStepSize',1e-2,'Cache','on');
+options = psoptimset('Cache','on');
+[Xopt,Jopt]=patternsearch(@(xopt)Optimise(xopt,Paramstart,Drag0,Shadow0,PI,PJ,x,y),x0,A,b,[],[],[0;0;0;0],[1;1;1;1],[],options);
+
+fclose('optf');
 %% Plot Data from SPARTA
 %Get the surface densities on the boundary (cba with the block)
 writefiles;
 Produce_Graphs(SurfSpecies,SurfDens);
 
-% end
  
 %% Plot Drag and Shadow length
 %{ 

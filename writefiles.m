@@ -43,6 +43,7 @@ dlmwrite(CFile, tempSurfDens,'-append','delimiter',' ','roffset',1);
 fclose(densout);
 
 %% Write the Knusden Number Output
+%{
 B = dlmread('/dev/shm/gas_properties.grid',' ',112518,0);
 B=sortrows(B);
 Knusden=B(C(1)-100:C(1),:);
@@ -56,3 +57,4 @@ fwrite(densout, 'VARIABLES = ID, Mean Free Path, Knusden Number\n');
 %fwrite(densout, 'Variables = ID Lambda Knusden_Number');
 dlmwrite(CFile, B,'-append','delimiter',' ');
 fclose('all');
+%}
